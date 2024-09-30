@@ -639,7 +639,6 @@ class WordNetContentHandler(ContentHandler):
         self.ili_defn = None
         self.example = None
         self.example_source = None
-        self.example = None
         self.usage = None
         self.synset = None
         self.pron = None
