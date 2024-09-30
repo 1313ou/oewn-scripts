@@ -269,6 +269,7 @@ class Synset:
         self.ili_definition = None
         self.synset_relations = []
         self.examples = []
+        self.usages = []
         self.source = source
         self.members = []
 
@@ -285,6 +286,9 @@ class Synset:
 
     def add_example(self, example):
         self.examples.append(example)
+
+    def add_usage(self, usage):
+        self.usages.append(usage)
 
     def to_xml(self, xml_file, comments):
         if self.id in comments:
@@ -310,6 +314,8 @@ class Synset:
             rel.to_xml(xml_file, comments)
         for ex in self.examples:
             ex.to_xml(xml_file)
+        for us in self.usages:
+            us.to_xml(xml_file)
         xml_file.write("""    </Synset>
 """)
 
@@ -342,6 +348,15 @@ class Example:
 
         else:
             xml_file.write("""      <Example>%s</Example>
+""" % escape_xml_lit(self.text))
+
+
+class Usage:
+    def __init__(self, text):
+        self.text = text
+
+    def to_xml(self, xml_file):
+        xml_file.write("""      <Usage>%s</Usage>
 """ % escape_xml_lit(self.text))
 
 
@@ -624,6 +639,8 @@ class WordNetContentHandler(ContentHandler):
         self.ili_defn = None
         self.example = None
         self.example_source = None
+        self.example = None
+        self.usage = None
         self.synset = None
         self.pron = None
         self.pron_var = None
@@ -668,6 +685,8 @@ class WordNetContentHandler(ContentHandler):
         elif name == "Example":
             self.example = ""
             self.example_source = attrs.get("dc:source")
+        elif name == "Usage":
+            self.example = ""
         elif name == "SynsetRelation":
             self.synset.add_synset_relation(
                 SynsetRelation(attrs["target"],
@@ -710,6 +729,9 @@ class WordNetContentHandler(ContentHandler):
         elif name == "Example":
             self.synset.add_example(Example(self.example, self.example_source))
             self.example = None
+        elif name == "Usage":
+            self.synset.add_usage(Usage(self.usage))
+            self.usage = None
         elif name == "Pronunciation":
             self.entry.pronunciation.append(Pronunciation(self.pron, self.pron_var))
             self.pron = None
@@ -721,6 +743,8 @@ class WordNetContentHandler(ContentHandler):
             self.ili_defn += content
         elif self.example is not None:
             self.example += content
+        elif self.usage is not None:
+            self.usage += content
         elif self.pron is not None:
             self.pron += content
         elif content.strip() == '':

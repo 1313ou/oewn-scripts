@@ -90,6 +90,8 @@ def synset_from_yaml(wn, props, id, lex_name):
             ss.add_example(Example(example))
         else:
             ss.add_example(Example(example["text"], example["source"]))
+    for usage in props.get("usage", []):
+        ss.add_usage(Usage(usage))
     for rel, targets in props.items():
         if rel in SynsetRelType._value2member_map_:
             for target in targets:
@@ -267,6 +269,11 @@ def example_to_yaml(wn, x):
         return x.text
 
 
+def usage_to_yaml(wn, x):
+    """Convert a usage note to YAML"""
+    return x.text
+
+
 frames = {
     "nonreferential": "It is ----ing",
     "nonreferential-sent": "It ----s that CLAUSE",
@@ -402,6 +409,8 @@ def save(wn, change_list=None):
                 wn, d) for d in synset.definitions]
         if synset.examples:
             s["example"] = [example_to_yaml(wn, x) for x in synset.examples]
+        if synset.usages:
+            s["usage"] = [usage_to_yaml(wn, x) for x in synset.usages]
         if synset.source:
             s["source"] = synset.source
         for r in synset.synset_relations:
